@@ -399,8 +399,6 @@ class TaskManager:
             ValueError,
             TypeError,
             SyntaxError,
-            MemoryError,
-            RecursionError,
         ):
           logging.exception('Could not parse extra: %s', extra)
           # Don't try to process the extra as text; that would probably crash.
