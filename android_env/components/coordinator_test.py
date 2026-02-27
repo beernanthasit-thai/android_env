@@ -278,6 +278,32 @@ class CoordinatorTest(parameterized.TestCase):
     self.assertEqual(response, expected_response)
     self._adb_call_parser.parse.assert_called_with(call)
 
+  @mock.patch.object(time, 'time', autospec=True)
+  def test_should_periodic_relaunch(self, mock_time):
+    # 1. Feature disabled (default behavior).
+    self.assertFalse(self._coordinator._should_periodic_relaunch())
+
+    # 2. Feature enabled, threshold not reached.
+    config = config_classes.CoordinatorConfig(periodic_restart_time_min=10.0)
+    self._coordinator = coordinator_lib.Coordinator(
+        simulator=self._simulator,
+        task_manager=self._task_manager,
+        device_settings=device_settings_lib.DeviceSettings(self._simulator),
+        config=config,
+    )
+    # Simulator started at time=100.
+    mock_time.return_value = 100.0
+    self._coordinator._launch_simulator()
+    # Current time is 100 + 5 minutes.
+    mock_time.return_value = 100.0 + 5.0 * 60.0
+    self.assertFalse(self._coordinator._should_periodic_relaunch())
+
+    # 3. Feature enabled, threshold reached.
+    # Current time is 100 + 11 minutes.
+    mock_time.return_value = 100.0 + 11.0 * 60.0
+    self.assertTrue(self._coordinator._should_periodic_relaunch())
+    self.assertEqual(self._coordinator.stats()['relaunch_count_periodic'], 1)
+
 
 if __name__ == '__main__':
   absltest.main()
