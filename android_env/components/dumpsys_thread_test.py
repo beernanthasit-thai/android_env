@@ -78,6 +78,8 @@ class DumpsysThreadTest(absltest.TestCase):
     # count to matches_current_app_screen() by 1), but it should return early.
     # The next 2 calls (16, 17) will hit the early exit from `check_frequency`.
     # In total there should be only two calls to `matches_current_app_screen()`.
+    if dumpsys._latest_check:
+      dumpsys._latest_check.result()
     expected_call_count = 2
     self.assertEqual(
         self._app_screen_checker.matches_current_app_screen.call_count,

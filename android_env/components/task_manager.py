@@ -102,6 +102,7 @@ class TaskManager:
 
   def stop(self) -> None:
     """Suspends task processing."""
+    self._stop_dumpsys_thread()
     n_tries = 3
     for i in range(n_tries):
       try:
@@ -263,6 +264,11 @@ class TaskManager:
     if self._logcat_thread is not None:
       self._logcat_thread.kill()
       self._logcat_thread = None
+
+  def _stop_dumpsys_thread(self):
+    if self._dumpsys_thread is not None:
+      self._dumpsys_thread.close()
+      self._dumpsys_thread = None
 
   def _increment_bad_state(self) -> None:
     """Increments the bad state counter.

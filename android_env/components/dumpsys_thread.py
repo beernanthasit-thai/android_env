@@ -56,6 +56,7 @@ class DumpsysThread:
     self._max_failed_activity_extraction = max_failed_current_activity
     self._num_failed_activity_extraction = 0
     self._latest_check: concurrent.futures.Future | None = None
+    self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
   def check_user_exited(self, timeout: float | None = None) -> bool:
     """Returns True if the user is not in the expected screen.
@@ -79,8 +80,7 @@ class DumpsysThread:
 
     # If the latest check is None, perform a check and return.
     if self._latest_check is None:
-      with concurrent.futures.ThreadPoolExecutor() as executor:
-        self._latest_check = executor.submit(self._check_impl)
+      self._latest_check = self._executor.submit(self._check_impl)
       return False
 
     # If there's a check in flight, continue only if it's finished.
@@ -123,3 +123,9 @@ class DumpsysThread:
       return True
 
     return False
+
+  def close(self):
+    """Clean up the executor."""
+    if self._executor:
+      self._executor.shutdown(wait=False)
+      self._executor = None
