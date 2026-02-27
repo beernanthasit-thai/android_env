@@ -20,6 +20,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import shlex
 
 from absl import logging
 from android_env.components import adb_controller as adb_control
@@ -616,7 +617,7 @@ class AdbCallParser:
           status=adb_pb2.AdbResponse.Status.FAILED_PRECONDITION,
           error_message='InputText.text is empty.')
 
-    response, _ = self._execute_command(['shell', 'input', 'text', text],
+    response, _ = self._execute_command(['shell', 'input', 'text', shlex.quote(text)],
                                         timeout=timeout)
     return response
 
