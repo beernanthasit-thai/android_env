@@ -46,6 +46,9 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
         android_accessibility_forest_pb2.AndroidAccessibilityForest | None
     ) = None
 
+    # Event for efficient waiting
+    self._new_forest_event = threading.Event()
+
   def SendForest(
       self,
       request: android_accessibility_forest_pb2.AndroidAccessibilityForest,
@@ -149,6 +152,8 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
     with self._lock_forests:
       forests = self._received_forests
       self._received_forests = []
+      # We cleared the buffer, so we clear the event.
+      self._new_forest_event.clear()
     return forests
 
   def gather_events(self) -> list[a11y_pb2.EventRequest]:
@@ -172,6 +177,7 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
     self._paused = True
     with self._lock_forests:
       self._received_forests = []
+      self._new_forest_event.clear()
     with self._lock_events:
       self._received_events = []
 
@@ -197,3 +203,8 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
           self._received_forests = [forest]
         else:
           self._received_forests.append(forest)
+        self._new_forest_event.set()
+
+  def wait_for_forests(self, timeout: float | None = None) -> bool:
+    """Waits for a forest to be received."""
+    return self._new_forest_event.wait(timeout)
