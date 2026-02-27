@@ -277,10 +277,10 @@ class Coordinator:
     if hasattr(self, '_task_manager'):
       try:
         self._task_manager.stop()
-      except:  # pylint: disable=bare-except
+      except Exception:
         logging.exception('Failed to stop task manager. Continuing.')
     if hasattr(self, '_simulator'):
       try:
         self._simulator.close()
-      except:  # pylint: disable=bare-except
+      except Exception:
         logging.exception('Failed to close simulator. Continuing.')
