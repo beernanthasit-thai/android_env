@@ -177,12 +177,37 @@ class Coordinator:
   def execute_adb_call(self, call: adb_pb2.AdbRequest) -> adb_pb2.AdbResponse:
     return self._adb_call_parser.parse(call)
 
+  def _ensure_simulator_healthy(self):
+    """Relaunches the simulator if it is not healthy or periodically."""
+    if not self._simulator_healthy or self._should_periodic_relaunch():
+      self._launch_simulator()
+
+  def _send_action_to_simulator(self, action: dict[str, np.ndarray]) -> bool:
+    """Sends action to the simulator.
+
+    Args:
+      action: Action to send to simulator.
+
+    Returns:
+      Boolean indicating if the action was sent successfully.
+    """
+    if not action_fns.send_action_to_simulator(
+        action,
+        self._simulator,
+        self._device_settings.screen_width(),
+        self._device_settings.screen_height(),
+        self._config.num_fingers,
+    ):
+      self._stats['relaunch_count_execute_action'] += 1
+      self._simulator_healthy = False
+      return False
+    return True
+
   def rl_reset(self) -> dm_env.TimeStep:
     """Resets the RL episode."""
 
     # Relaunch the simulator if necessary.
-    if not self._simulator_healthy or self._should_periodic_relaunch():
-      self._launch_simulator()
+    self._ensure_simulator_healthy()
 
     # Reset counters.
     self._latest_observation_time = 0
@@ -191,15 +216,9 @@ class Coordinator:
         self._stats[key] = 0.0
 
     # Execute a lift action before resetting the task.
-    if not action_fns.send_action_to_simulator(
-        action_fns.lift_all_fingers_action(self._config.num_fingers),
-        self._simulator,
-        self._device_settings.screen_width(),
-        self._device_settings.screen_height(),
-        self._config.num_fingers,
-    ):
-      self._stats['relaunch_count_execute_action'] += 1
-      self._simulator_healthy = False
+    self._send_action_to_simulator(
+        action_fns.lift_all_fingers_action(self._config.num_fingers)
+    )
 
     # Reset the task.
     self._task_manager.reset_task()
@@ -215,22 +234,14 @@ class Coordinator:
 
     Args:
       agent_action: Selected action to perform on the simulated Android device.
-        If `agent_action` is `None` it means that this is an RL reset (to start
+        If  is  it means that this is an RL reset (to start
         a new episode).
 
     Returns:
       An RL timestep.
     """
 
-    if not action_fns.send_action_to_simulator(
-        agent_action,
-        self._simulator,
-        self._device_settings.screen_width(),
-        self._device_settings.screen_height(),
-        self._config.num_fingers,
-    ):
-      self._stats['relaunch_count_execute_action'] += 1
-      self._simulator_healthy = False
+    self._send_action_to_simulator(agent_action)
 
     # Get data from the simulator.
     try:
