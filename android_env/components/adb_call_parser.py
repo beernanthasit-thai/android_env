@@ -844,21 +844,19 @@ class AdbCallParser:
 
     return response
 
-  def _handle_dumpsys(
-      self, request: adb_pb2.AdbRequest, timeout: float | None = None
-  ) -> adb_pb2.AdbResponse:
-    """Handles DumpsysRequest messages.
+  def _build_dumpsys_command(
+      self, request: adb_pb2.AdbRequest.DumpsysRequest
+  ) -> tuple[list[str] | None, adb_pb2.AdbResponse | None]:
+    """Builds the dumpsys command from the request.
 
     Args:
-      request: The request with the `.dumpsys` field set containing
-        sub-commands to `adb dumpsys` shell command..
-      timeout: Optional time limit in seconds.
+      request: The DumpsysRequest message.
 
     Returns:
-      An AdbResponse.
+      A tuple containing:
+        - The command list if successful, otherwise None.
+        - An AdbResponse with error details if validation fails, otherwise None.
     """
-
-    request = request.dumpsys
     cmd = ['shell', 'dumpsys']
 
     if request.timeout_sec < 0 or request.timeout_ms < 0:
@@ -866,8 +864,9 @@ class AdbCallParser:
       response.status = adb_pb2.AdbResponse.Status.FAILED_PRECONDITION
       response.error_message = (
           'DumpsysRequest.timeout_{sec, ms} should be non-negative. '
-          f'Got: {request}.')
-      return response
+          f'Got: {request}.'
+      )
+      return None, response
 
     if request.list_only:
       # `-l` cannot be combined with the following options.
@@ -876,8 +875,9 @@ class AdbCallParser:
         response.status = adb_pb2.AdbResponse.Status.FAILED_PRECONDITION
         response.error_message = (
             'DumpsysRequest.list_only cannot be combined with other options. '
-            f'Got: {request}.')
-        return response
+            f'Got: {request}.'
+        )
+        return None, response
 
       cmd.append('-l')
 
@@ -893,8 +893,9 @@ class AdbCallParser:
         != adb_pb2.AdbRequest.DumpsysRequest.PriorityLevel.UNSET
     ):
       cmd.append('--priority')
-      cmd.append(adb_pb2.AdbRequest.DumpsysRequest.PriorityLevel.Name(
-          request.priority))
+      cmd.append(
+          adb_pb2.AdbRequest.DumpsysRequest.PriorityLevel.Name(request.priority)
+      )
 
     if request.skip_services:
       if request.service:
@@ -902,8 +903,9 @@ class AdbCallParser:
         response.status = adb_pb2.AdbResponse.Status.FAILED_PRECONDITION
         response.error_message = (
             'DumpsysRequest.skip_services cannot be combined with `service`. '
-            f'Got: {request}.')
-        return response
+            f'Got: {request}.'
+        )
+        return None, response
 
       cmd.append('--skip')
       cmd.append(','.join(request.skip_services))
@@ -917,6 +919,27 @@ class AdbCallParser:
     if request.proto:
       cmd.append('--proto')
 
+    return cmd, None
+
+  def _handle_dumpsys(
+      self, request: adb_pb2.AdbRequest, timeout: float | None = None
+  ) -> adb_pb2.AdbResponse:
+    """Handles DumpsysRequest messages.
+
+    Args:
+      request: The request with the `.dumpsys` field set containing
+        sub-commands to `adb dumpsys` shell command..
+      timeout: Optional time limit in seconds.
+
+    Returns:
+      An AdbResponse.
+    """
+
+    cmd, error_response = self._build_dumpsys_command(request.dumpsys)
+    if error_response:
+        return error_response
+
+    response = adb_pb2.AdbResponse()
     response, response.dumpsys.output = self._execute_command(
         cmd, timeout=timeout)
 

@@ -1,0 +1,226 @@
+Running tests under Python 3.12.12: /home/jules/.pyenv/versions/3.12.12/bin/python3
+[ RUN      ] AdbCallParserTest.test_dumpsys_empty_request
+[       OK ] AdbCallParserTest.test_dumpsys_empty_request
+[ RUN      ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_arbitrary_args
+[       OK ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_arbitrary_args
+[ RUN      ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_skip_usb
+[       OK ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_skip_usb
+[ RUN      ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_window_service
+[       OK ] AdbCallParserTest.test_dumpsys_list_only_cannot_be_combined_window_service
+[ RUN      ] AdbCallParserTest.test_dumpsys_list_only_success
+[       OK ] AdbCallParserTest.test_dumpsys_list_only_success
+[ RUN      ] AdbCallParserTest.test_dumpsys_negative_timeouts_negative_timeout_ms
+[       OK ] AdbCallParserTest.test_dumpsys_negative_timeouts_negative_timeout_ms
+[ RUN      ] AdbCallParserTest.test_dumpsys_negative_timeouts_negative_timeout_sec
+[       OK ] AdbCallParserTest.test_dumpsys_negative_timeouts_negative_timeout_sec
+[ RUN      ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_critical
+[       OK ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_critical
+[ RUN      ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_high
+[       OK ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_high
+[ RUN      ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_normal
+[       OK ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_normal
+[ RUN      ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_undefined
+[       OK ] AdbCallParserTest.test_dumpsys_priority_timeout_successful_priority_undefined
+[ RUN      ] AdbCallParserTest.test_dumpsys_single_service
+[       OK ] AdbCallParserTest.test_dumpsys_single_service
+[ RUN      ] AdbCallParserTest.test_dumpsys_single_service_with_args
+[       OK ] AdbCallParserTest.test_dumpsys_single_service_with_args
+[ RUN      ] AdbCallParserTest.test_dumpsys_single_service_with_proto
+[       OK ] AdbCallParserTest.test_dumpsys_single_service_with_proto
+[ RUN      ] AdbCallParserTest.test_dumpsys_skip_services
+[       OK ] AdbCallParserTest.test_dumpsys_skip_services
+[ RUN      ] AdbCallParserTest.test_dumpsys_skip_services_cannot_combine_with_service
+[       OK ] AdbCallParserTest.test_dumpsys_skip_services_cannot_combine_with_service
+[ RUN      ] AdbCallParserTest.test_dumpsys_timeout_successful_both_timeouts_zero
+[       OK ] AdbCallParserTest.test_dumpsys_timeout_successful_both_timeouts_zero
+[ RUN      ] AdbCallParserTest.test_dumpsys_timeout_successful_ms_if_no_sec
+[       OK ] AdbCallParserTest.test_dumpsys_timeout_successful_ms_if_no_sec
+[ RUN      ] AdbCallParserTest.test_dumpsys_timeout_successful_sec_takes_precedence
+[       OK ] AdbCallParserTest.test_dumpsys_timeout_successful_sec_takes_precedence
+[ RUN      ] AdbCallParserTest.test_dumpsys_timeout_successful_sec_takes_precedence_zero
+[       OK ] AdbCallParserTest.test_dumpsys_timeout_successful_sec_takes_precedence_zero
+[ RUN      ] AdbCallParserTest.test_force_stop
+[       OK ] AdbCallParserTest.test_force_stop
+[ RUN      ] AdbCallParserTest.test_generic_command
+[       OK ] AdbCallParserTest.test_generic_command
+[ RUN      ] AdbCallParserTest.test_generic_command_adb_error
+[       OK ] AdbCallParserTest.test_generic_command_adb_error
+[ RUN      ] AdbCallParserTest.test_generic_command_timeout
+[       OK ] AdbCallParserTest.test_generic_command_timeout
+[ RUN      ] AdbCallParserTest.test_get_current_activity_no_matches
+[       OK ] AdbCallParserTest.test_get_current_activity_no_matches
+[ RUN      ] AdbCallParserTest.test_get_current_activity_no_visible_task
+[       OK ] AdbCallParserTest.test_get_current_activity_no_visible_task
+[ RUN      ] AdbCallParserTest.test_get_current_activity_successful
+[       OK ] AdbCallParserTest.test_get_current_activity_successful
+[ RUN      ] AdbCallParserTest.test_get_orientation_empty_dumpsys
+I0227 01:46:50.718190 140548419369856 adb_call_parser.py:491] Getting orientation...
+E0227 01:46:50.718496 140548419369856 adb_call_parser.py:498] Empty dumpsys output.
+[       OK ] AdbCallParserTest.test_get_orientation_empty_dumpsys
+[ RUN      ] AdbCallParserTest.test_get_orientation_invalid_device_no_surface_orientation
+I0227 01:46:50.727532 140548419369856 adb_call_parser.py:491] Getting orientation...
+[       OK ] AdbCallParserTest.test_get_orientation_invalid_device_no_surface_orientation
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_0
+I0227 01:46:50.736242 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.736468 140548419369856 adb_call_parser.py:525] Done getting orientation: '0'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_0
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_0_new
+I0227 01:46:50.744423 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.744624 140548419369856 adb_call_parser.py:525] Done getting orientation: '0'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_0_new
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_180
+I0227 01:46:50.752476 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.752823 140548419369856 adb_call_parser.py:525] Done getting orientation: '2'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_180
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_180_new
+I0227 01:46:50.760636 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.760889 140548419369856 adb_call_parser.py:525] Done getting orientation: '2'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_180_new
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_270
+I0227 01:46:50.769059 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.769267 140548419369856 adb_call_parser.py:525] Done getting orientation: '3'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_270
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_270_new
+I0227 01:46:50.779519 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.779905 140548419369856 adb_call_parser.py:525] Done getting orientation: '3'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_270_new
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_90
+I0227 01:46:50.790544 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.790826 140548419369856 adb_call_parser.py:525] Done getting orientation: '1'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_90
+[ RUN      ] AdbCallParserTest.test_get_orientation_success_rotation_90_new
+I0227 01:46:50.798573 140548419369856 adb_call_parser.py:491] Getting orientation...
+I0227 01:46:50.798825 140548419369856 adb_call_parser.py:525] Done getting orientation: '1'
+[       OK ] AdbCallParserTest.test_get_orientation_success_rotation_90_new
+[ RUN      ] AdbCallParserTest.test_grant_permissions_empty_package_name
+[       OK ] AdbCallParserTest.test_grant_permissions_empty_package_name
+[ RUN      ] AdbCallParserTest.test_grant_permissions_empty_permissions
+[       OK ] AdbCallParserTest.test_grant_permissions_empty_permissions
+[ RUN      ] AdbCallParserTest.test_grant_permissions_successful
+I0227 01:46:50.823320 140548419369856 adb_call_parser.py:839] Granting permission: 'perm1'
+I0227 01:46:50.823529 140548419369856 adb_call_parser.py:839] Granting permission: 'perm2'
+[       OK ] AdbCallParserTest.test_grant_permissions_successful
+[ RUN      ] AdbCallParserTest.test_input_text_no_text
+[       OK ] AdbCallParserTest.test_input_text_no_text
+[ RUN      ] AdbCallParserTest.test_input_text_successful
+[       OK ] AdbCallParserTest.test_input_text_successful
+[ RUN      ] AdbCallParserTest.test_install_apk_file_not_found
+I0227 01:46:50.856871 140548419369856 adb_call_parser.py:269] location_type: filesystem
+[       OK ] AdbCallParserTest.test_install_apk_file_not_found
+[ RUN      ] AdbCallParserTest.test_install_apk_from_blob
+I0227 01:46:50.882488 140548419369856 adb_call_parser.py:269] location_type: blob
+[       OK ] AdbCallParserTest.test_install_apk_from_blob
+[ RUN      ] AdbCallParserTest.test_install_apk_successful
+I0227 01:46:50.892725 140548419369856 adb_call_parser.py:269] location_type: filesystem
+[       OK ] AdbCallParserTest.test_install_apk_successful
+[ RUN      ] AdbCallParserTest.test_invalid_timeout
+[       OK ] AdbCallParserTest.test_invalid_timeout
+[ RUN      ] AdbCallParserTest.test_package_manager_clear_no_package_name
+[       OK ] AdbCallParserTest.test_package_manager_clear_no_package_name
+[ RUN      ] AdbCallParserTest.test_package_manager_clear_successful_no_user_id
+[       OK ] AdbCallParserTest.test_package_manager_clear_successful_no_user_id
+[ RUN      ] AdbCallParserTest.test_package_manager_clear_successful_with_user_id
+[       OK ] AdbCallParserTest.test_package_manager_clear_successful_with_user_id
+[ RUN      ] AdbCallParserTest.test_package_manager_list_bad_output_features
+[       OK ] AdbCallParserTest.test_package_manager_list_bad_output_features
+[ RUN      ] AdbCallParserTest.test_package_manager_list_bad_output_libraries
+[       OK ] AdbCallParserTest.test_package_manager_list_bad_output_libraries
+[ RUN      ] AdbCallParserTest.test_package_manager_list_bad_output_packages
+[       OK ] AdbCallParserTest.test_package_manager_list_bad_output_packages
+[ RUN      ] AdbCallParserTest.test_package_manager_list_features
+[       OK ] AdbCallParserTest.test_package_manager_list_features
+[ RUN      ] AdbCallParserTest.test_package_manager_list_libraries
+[       OK ] AdbCallParserTest.test_package_manager_list_libraries
+[ RUN      ] AdbCallParserTest.test_package_manager_list_packages
+[       OK ] AdbCallParserTest.test_package_manager_list_packages
+[ RUN      ] AdbCallParserTest.test_press_button_invalid_button
+[       OK ] AdbCallParserTest.test_press_button_invalid_button
+[ RUN      ] AdbCallParserTest.test_press_button_successful
+[       OK ] AdbCallParserTest.test_press_button_successful
+[ RUN      ] AdbCallParserTest.test_pull_no_path
+[       OK ] AdbCallParserTest.test_pull_no_path
+[ RUN      ] AdbCallParserTest.test_pull_successful
+[       OK ] AdbCallParserTest.test_pull_successful
+[ RUN      ] AdbCallParserTest.test_push_no_path
+[       OK ] AdbCallParserTest.test_push_no_path
+[ RUN      ] AdbCallParserTest.test_push_successful
+I0227 01:46:51.038884 140548419369856 adb_call_parser.py:560] Uploading '/tmp/tmp2y2a26l5' to '/sdcard/my_file.txt'.
+[       OK ] AdbCallParserTest.test_push_successful
+[ RUN      ] AdbCallParserTest.test_send_broadcast_empty_action
+[       OK ] AdbCallParserTest.test_send_broadcast_empty_action
+[ RUN      ] AdbCallParserTest.test_send_broadcast_successful
+[       OK ] AdbCallParserTest.test_send_broadcast_successful
+[ RUN      ] AdbCallParserTest.test_send_broadcast_with_component_successful
+[       OK ] AdbCallParserTest.test_send_broadcast_with_component_successful
+[ RUN      ] AdbCallParserTest.test_settings_failures_delete_no_key
+[       OK ] AdbCallParserTest.test_settings_failures_delete_no_key
+[ RUN      ] AdbCallParserTest.test_settings_failures_empty_request
+[       OK ] AdbCallParserTest.test_settings_failures_empty_request
+[ RUN      ] AdbCallParserTest.test_settings_failures_get_no_key
+[       OK ] AdbCallParserTest.test_settings_failures_get_no_key
+[ RUN      ] AdbCallParserTest.test_settings_failures_no_namespace
+[       OK ] AdbCallParserTest.test_settings_failures_no_namespace
+[ RUN      ] AdbCallParserTest.test_settings_failures_put_no_key
+[       OK ] AdbCallParserTest.test_settings_failures_put_no_key
+[ RUN      ] AdbCallParserTest.test_settings_failures_put_no_value
+[       OK ] AdbCallParserTest.test_settings_failures_put_no_value
+[ RUN      ] AdbCallParserTest.test_settings_failures_reset_no_package_name_and_no_mode
+[       OK ] AdbCallParserTest.test_settings_failures_reset_no_package_name_and_no_mode
+[ RUN      ] AdbCallParserTest.test_settings_success_delete
+[       OK ] AdbCallParserTest.test_settings_success_delete
+[ RUN      ] AdbCallParserTest.test_settings_success_get
+[       OK ] AdbCallParserTest.test_settings_success_get
+[ RUN      ] AdbCallParserTest.test_settings_success_list
+[       OK ] AdbCallParserTest.test_settings_success_list
+[ RUN      ] AdbCallParserTest.test_settings_success_put
+[       OK ] AdbCallParserTest.test_settings_success_put
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_trusted_defaults
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_trusted_defaults
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_trusted_defaults_package_given
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_trusted_defaults_package_given
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_unknown_package_given
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_unknown_package_given
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_clear
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_clear
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_clear_package_given
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_clear_package_given
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_defaults
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_defaults
+[ RUN      ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_defaults_package_given
+[       OK ] AdbCallParserTest.test_settings_success_reset_mode_untrusted_defaults_package_given
+[ RUN      ] AdbCallParserTest.test_start_activity_empty_full_activity
+[       OK ] AdbCallParserTest.test_start_activity_empty_full_activity
+[ RUN      ] AdbCallParserTest.test_start_activity_error
+[       OK ] AdbCallParserTest.test_start_activity_error
+[ RUN      ] AdbCallParserTest.test_start_activity_successful
+[       OK ] AdbCallParserTest.test_start_activity_successful
+[ RUN      ] AdbCallParserTest.test_start_activity_successful_no_force_stop
+[       OK ] AdbCallParserTest.test_start_activity_successful_no_force_stop
+[ RUN      ] AdbCallParserTest.test_start_screen_pinning_base_activity
+[       OK ] AdbCallParserTest.test_start_screen_pinning_base_activity
+[ RUN      ] AdbCallParserTest.test_start_screen_pinning_package_not_found
+I0227 01:46:51.280218 140548419369856 adb_call_parser.py:171] Full activity my.project.AmazingActivity was not found in current line   taskId=12345: my.project.AnotherActivity visible=true  topActivity=ComponentInfo{my.project.AnotherActivity}
+E0227 01:46:51.280381 140548419369856 adb_call_parser.py:182] Could not find current activity in stack list: ['  taskId=12345: my.project.AnotherActivity visible=true  topActivity=ComponentInfo{my.project.AnotherActivity}']
+[       OK ] AdbCallParserTest.test_start_screen_pinning_package_not_found
+[ RUN      ] AdbCallParserTest.test_start_screen_pinning_successful
+[       OK ] AdbCallParserTest.test_start_screen_pinning_successful
+[ RUN      ] AdbCallParserTest.test_start_screen_pinning_top_activity
+[       OK ] AdbCallParserTest.test_start_screen_pinning_top_activity
+[ RUN      ] AdbCallParserTest.test_tap_failed_negative_x
+[       OK ] AdbCallParserTest.test_tap_failed_negative_x
+[ RUN      ] AdbCallParserTest.test_tap_failed_negative_x_and_negative_y
+[       OK ] AdbCallParserTest.test_tap_failed_negative_x_and_negative_y
+[ RUN      ] AdbCallParserTest.test_tap_failed_negative_y
+[       OK ] AdbCallParserTest.test_tap_failed_negative_y
+[ RUN      ] AdbCallParserTest.test_tap_successful
+[       OK ] AdbCallParserTest.test_tap_successful
+[ RUN      ] AdbCallParserTest.test_uninstall_package_empty_package_name
+[       OK ] AdbCallParserTest.test_uninstall_package_empty_package_name
+[ RUN      ] AdbCallParserTest.test_uninstall_package_successful
+[       OK ] AdbCallParserTest.test_uninstall_package_successful
+[ RUN      ] AdbCallParserTest.test_unknown_command
+[       OK ] AdbCallParserTest.test_unknown_command
+----------------------------------------------------------------------
+Ran 97 tests in 0.905s
+
+OK
