@@ -32,6 +32,7 @@ from android_env.components.simulators import base_simulator
 from android_env.proto import adb_pb2
 from android_env.proto import state_pb2
 from android_env.proto import task_pb2
+
 import dm_env
 import numpy as np
 
@@ -278,6 +279,42 @@ class CoordinatorTest(parameterized.TestCase):
     self.assertEqual(response, expected_response)
     self._adb_call_parser.parse.assert_called_with(call)
 
+
+if __name__ == '__main__':
+  absltest.main()
+
+  @mock.patch.object(time, 'sleep', autospec=True)
+  def test_launch_simulator_adb_controller_error_on_update_settings(
+      self, unused_mock_sleep):
+    """Tests that AdbControllerError during settings update is handled."""
+    # We mock _device_settings.update to fail once, then succeed.
+
+  @mock.patch.object(time, 'sleep', autospec=True)
+  def test_launch_simulator_adb_controller_error_on_update_settings(
+      self, unused_mock_sleep):
+    """Tests that AdbControllerError during settings update is handled."""
+    # We mock _device_settings.update to fail once, then succeed.
+    with mock.patch.object(
+        self._coordinator._device_settings, 'update', autospec=True
+    ) as mock_update:
+      mock_update.side_effect = [
+          errors.AdbControllerError('Simulated error'),
+          None
+      ]
+
+      # We also need to mock task_manager.setup_task to prevent further errors
+      # and ensure the loop completes.
+      self._task_manager.setup_task.return_value = None
+
+      # Call the method under test.
+      self._coordinator._launch_simulator()
+
+      # Verify that the error was counted.
+      stats = self._coordinator.stats()
+      self.assertEqual(stats['relaunch_count_update_settings'], 1)
+
+      # Verify that it retried (called update twice).
+      self.assertEqual(mock_update.call_count, 2)
 
 if __name__ == '__main__':
   absltest.main()
