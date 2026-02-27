@@ -1,0 +1,4 @@
+build/
+android_env.egg-info/
+__pycache__/
+*.pyc
