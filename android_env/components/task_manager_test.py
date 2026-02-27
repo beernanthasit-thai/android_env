@@ -413,3 +413,46 @@ class TaskManagerTest(absltest.TestCase):
 
 if __name__ == '__main__':
   absltest.main()
+
+  def test_get_current_extras_jagged_array(self):
+    # Replace `LogcatThread.add_event_listener` with one that simply calls `fn`
+    # right away.
+    def my_add_ev_listener(event_listener: logcat_thread.EventListener):
+      # Check that the event matches what's expected.
+      event = event_listener.regexp
+      match = event.match('extra: some_extra [1, 2]')
+      if match is None:  # Ignore events that are not extras.
+        return
+
+      # Emit events.
+      fn = event_listener.handler_fn
+      fn(event, event.match('extra: jagged_extra [1, 2]'))
+      fn(event, event.match('extra: jagged_extra [3]'))
+
+    # Setup the task and trigger the listener.
+    task = task_pb2.Task()
+    task.log_parsing_config.log_regexps.extra.extend([
+        '^extra: (?P<name>[^ ]*)[ ]?(?P<extra>.*)$'
+    ])
+    task_mgr = task_manager.TaskManager(task=task)
+    self._logcat_thread.add_event_listener.side_effect = my_add_ev_listener
+    adb_call_parser = mock.create_autospec(adb_call_parser_lib.AdbCallParser)
+    task_mgr.start(lambda: adb_call_parser, log_stream=self._log_stream)
+    task_mgr.setup_task()
+
+    timestep = task_mgr.rl_step(
+        observation={
+            'pixels': np.array([1, 2, 3]),
+        })
+
+    # Check expectations.
+    self.assertIn('extras', timestep.observation)
+    extras = timestep.observation['extras']
+
+    # We expect an object array containing numpy arrays
+    jagged_extra = extras.get('jagged_extra')
+    self.assertIsInstance(jagged_extra, np.ndarray)
+    self.assertEqual(jagged_extra.dtype, object)
+    self.assertEqual(len(jagged_extra), 2)
+    np.testing.assert_array_equal(jagged_extra[0], np.array([1, 2]))
+    np.testing.assert_array_equal(jagged_extra[1], np.array([3]))

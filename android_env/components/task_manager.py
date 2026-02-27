@@ -189,7 +189,10 @@ class TaskManager:
     """Returns task extras accumulated since the last step."""
     extras = {}
     for name, values in self._latest_values['extra'].items():
-      extras[name] = np.stack(values)
+      try:
+        extras[name] = np.stack(values)
+      except ValueError:
+        extras[name] = np.array(values, dtype=object)
     self._latest_values['extra'] = {}
     return extras
 
