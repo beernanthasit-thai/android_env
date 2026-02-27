@@ -112,7 +112,7 @@ class FakeSimulator(base_simulator.BaseSimulator):
     self._screen_dimensions = np.array(config.screen_dimensions)
     logging.info('Created FakeSimulator.')
 
-  def get_logs(self) -> str:
+  def get_logs(self) -> str | None:
     return 'FakeSimulator: fake logs'
 
   def adb_device_name(self) -> str:

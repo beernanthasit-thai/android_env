@@ -178,7 +178,7 @@ class EmulatorSimulator(base_simulator.BaseSimulator):
 
     return wrapper
 
-  def get_logs(self) -> str:
+  def get_logs(self) -> str | None:
     """Returns logs recorded by the emulator."""
     if self._logfile_path and os.path.exists(self._logfile_path):
       with open(self._logfile_path, 'rb') as f:

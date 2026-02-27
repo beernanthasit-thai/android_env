@@ -49,9 +49,9 @@ class BaseSimulator(metaclass=abc.ABCMeta):
     # An increasing number that tracks the attempt at launching the simulator.
     self._num_launch_attempts: int = 0
 
-  def get_logs(self) -> str:
+  @abc.abstractmethod
+  def get_logs(self) -> str | None:
     """Returns logs recorded by the simulator (if provided)."""
-    return 'No simulator logs provided.'
 
   @abc.abstractmethod
   def adb_device_name(self) -> str:
@@ -77,8 +77,10 @@ class BaseSimulator(metaclass=abc.ABCMeta):
     try:
       self._launch_impl()
     except Exception as error:
-      for line in self.get_logs().splitlines():
-        logging.error(line)
+      logs = self.get_logs()
+      if logs:
+        for line in logs.splitlines():
+          logging.error(line)
       raise errors.SimulatorError(
           'Exception caught in simulator. Please see the simulator logs '
           'above for more details.'
