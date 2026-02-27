@@ -116,9 +116,7 @@ def build_tree_from_dumpsys_output(dumpsys_output: str) -> _DumpsysNode:
       num_levels = (indent // 2) + 1
       parents_stack = parents_stack[:num_levels]
       parent = parents_stack.pop()
-    elif indent > parent_indent:  # `new_node` is a child.
-      pass  # No need to change the current parent.
-
+    # If indent > parent_indent, 'new_node' is a child. No need to change the current parent.
     parent.children.append(new_node)
     parents_stack.append(parent)
     parents_stack.append(new_node)

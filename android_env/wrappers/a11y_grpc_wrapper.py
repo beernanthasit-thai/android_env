@@ -360,7 +360,7 @@ class A11yGrpcWrapper(base_wrapper.BaseWrapper):
     """
     timer = timer or 0.0
     if timer > 0.0:
-      time.sleep(timer)
+      self._servicer.wait_for_forests(timer)
 
     if get_env_observation:
       # Fetch observation.
