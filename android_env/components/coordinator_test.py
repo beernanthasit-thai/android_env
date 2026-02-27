@@ -278,6 +278,21 @@ class CoordinatorTest(parameterized.TestCase):
     self.assertEqual(response, expected_response)
     self._adb_call_parser.parse.assert_called_with(call)
 
+  @mock.patch.object(time, 'sleep', autospec=True)
+  def test_close_exceptions(self, unused_mock_sleep):
+    self._task_manager.stop.reset_mock()
+    self._simulator.close.reset_mock()
+    """Ensure close() handles exceptions gracefully."""
+    # Simulate exceptions when stopping task manager and closing simulator.
+    self._task_manager.stop.side_effect = Exception('Task manager error')
+    self._simulator.close.side_effect = Exception('Simulator error')
+
+    # This should not raise an exception.
+    self._coordinator.close()
+
+    self._task_manager.stop.assert_called_once()
+    self._simulator.close.assert_called_once()
+
 
 if __name__ == '__main__':
   absltest.main()
