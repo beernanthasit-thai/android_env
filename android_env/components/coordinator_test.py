@@ -279,5 +279,16 @@ class CoordinatorTest(parameterized.TestCase):
     self._adb_call_parser.parse.assert_called_with(call)
 
 
+
+  @mock.patch.object(time, 'sleep', autospec=True)
+  def test_close_with_errors(self, unused_mock_sleep):
+    self._task_manager.stop.reset_mock()
+    self._simulator.close.reset_mock()
+    self._task_manager.stop.side_effect = errors.StepCommandError
+    self._simulator.close.side_effect = errors.ReadObservationError
+    self._coordinator.close()
+    self._task_manager.stop.assert_called_once()
+    self._simulator.close.assert_called_once()
+
 if __name__ == '__main__':
   absltest.main()
