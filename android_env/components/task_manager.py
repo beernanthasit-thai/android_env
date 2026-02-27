@@ -16,6 +16,7 @@
 """TaskManager handles all events and information related to the task."""
 
 import ast
+import collections
 from collections.abc import Callable, Iterable, Sequence
 import copy
 import datetime
@@ -372,15 +373,12 @@ class TaskManager:
     with self._lock:
       latest_extras = self._latest_values['extra']
       if extra_name in latest_extras:
-        # If latest extra is not flushed, append.
-        if (
-            len(latest_extras[extra_name])
-            >= self._config.extras_max_buffer_size
-        ):
-          latest_extras[extra_name].pop(0)
         latest_extras[extra_name].append(extra)
       else:
-        latest_extras[extra_name] = [extra]
+        maxlen = self._config.extras_max_buffer_size
+        if maxlen < 1:
+          maxlen = 1
+        latest_extras[extra_name] = collections.deque([extra], maxlen=maxlen)
       self._latest_values['extra'] = latest_extras
 
   def _extras_listeners(
