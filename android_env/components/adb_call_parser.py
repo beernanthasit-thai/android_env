@@ -17,6 +17,7 @@
 
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -131,7 +132,8 @@ class AdbCallParser:
       return response
 
     response, _ = self._execute_command(
-        ['shell', 'am', 'force-stop', force_stop.package_name], timeout)
+        ['shell', 'am', 'force-stop', shlex.quote(force_stop.package_name)],
+        timeout)
 
     return response
 
@@ -237,12 +239,12 @@ class AdbCallParser:
       return response
 
     if send_broadcast.component:
-      component_args = ['-n', send_broadcast.component]
+      component_args = ['-n', shlex.quote(send_broadcast.component)]
     else:
       component_args = []
 
     response, _ = self._execute_command(
-        ['shell', 'am', 'broadcast', '-a', send_broadcast.action]
+        ['shell', 'am', 'broadcast', '-a', shlex.quote(send_broadcast.action)]
         + component_args,
         timeout=timeout,
     )
@@ -336,9 +338,10 @@ class AdbCallParser:
           error_message='`start_activity.full_activity` cannot be empty.')
 
     force_stop = '-S' if request.start_activity.force_stop else ''
+    extra_args = [shlex.quote(x) for x in (request.start_activity.extra_args or [])]
     response, command_output = self._execute_command(
-        ['shell', 'am', 'start', force_stop, '-W', '-n', activity] +
-        list(request.start_activity.extra_args or []),
+        ['shell', 'am', 'start', force_stop, '-W', '-n', shlex.quote(activity)] +
+        extra_args,
         timeout=timeout)
 
     # Check command output for potential errors.
@@ -616,7 +619,7 @@ class AdbCallParser:
           status=adb_pb2.AdbResponse.Status.FAILED_PRECONDITION,
           error_message='InputText.text is empty.')
 
-    response, _ = self._execute_command(['shell', 'input', 'text', text],
+    response, _ = self._execute_command(['shell', 'input', 'text', shlex.quote(text)],
                                         timeout=timeout)
     return response
 
@@ -688,7 +691,7 @@ class AdbCallParser:
           )
           return response
         response, command_output = self._execute_command(
-            ['shell', 'settings', 'get', namespace, get.key], timeout=timeout
+            ['shell', 'settings', 'get', namespace, shlex.quote(get.key)], timeout=timeout
         )
         response.settings.output = command_output
       case 'put':
@@ -700,7 +703,7 @@ class AdbCallParser:
           )
           return response
         response, command_output = self._execute_command(
-            ['shell', 'settings', 'put', namespace, put.key, put.value],
+            ['shell', 'settings', 'put', namespace, shlex.quote(put.key), shlex.quote(put.value)],
             timeout=timeout,
         )
         response.settings.output = command_output
@@ -713,7 +716,7 @@ class AdbCallParser:
           )
           return response
         response, command_output = self._execute_command(
-            ['shell', 'settings', 'delete', namespace, delete.key],
+            ['shell', 'settings', 'delete', namespace, shlex.quote(delete.key)],
             timeout=timeout,
         )
         response.settings.output = command_output
@@ -737,7 +740,7 @@ class AdbCallParser:
         ).lower()
         arg = reset.package_name or mode
         response, command_output = self._execute_command(
-            ['shell', 'settings', 'reset', namespace, arg], timeout=timeout
+            ['shell', 'settings', 'reset', namespace, shlex.quote(arg)], timeout=timeout
         )
         response.settings.output = command_output
       case 'list':
@@ -792,6 +795,7 @@ class AdbCallParser:
     match request.WhichOneof('verb'):
       case 'list':
         what = request.list.WhichOneof('what')
+        # 'what' comes from protobuf oneof, so it is constrained to valid values 'features', 'libraries', 'packages'
         response, output = self._execute_command(
             ['shell', 'pm', 'list', what], timeout=timeout
         )
@@ -816,10 +820,10 @@ class AdbCallParser:
           )
           return response
 
-        args = ['shell', 'pm', 'clear', package_name]
+        args = ['shell', 'pm', 'clear', shlex.quote(package_name)]
         if request.clear.user_id:
           args.insert(3, '-f')
-          args.insert(4, request.clear.user_id)
+          args.insert(4, shlex.quote(request.clear.user_id))
         response, response.package_manager.output = self._execute_command(
             args, timeout=timeout
         )
@@ -838,7 +842,7 @@ class AdbCallParser:
         for permission in grant.permissions:
           logging.info('Granting permission: %r', permission)
           response, response.package_manager.output = self._execute_command(
-              ['shell', 'pm', 'grant', grant.package_name, permission],
+              ['shell', 'pm', 'grant', shlex.quote(grant.package_name), shlex.quote(permission)],
               timeout=timeout,
           )
 
@@ -906,13 +910,13 @@ class AdbCallParser:
         return response
 
       cmd.append('--skip')
-      cmd.append(','.join(request.skip_services))
+      cmd.append(','.join([shlex.quote(s) for s in request.skip_services]))
 
     if request.service:
-      cmd.append(request.service)
+      cmd.append(shlex.quote(request.service))
 
     if request.args:
-      cmd += list(request.args)
+      cmd += [shlex.quote(arg) for arg in request.args]
 
     if request.proto:
       cmd.append('--proto')

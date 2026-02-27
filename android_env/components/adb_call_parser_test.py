@@ -578,7 +578,7 @@ class AdbCallParserTest(parameterized.TestCase):
     self.assertEqual(response.status, adb_pb2.AdbResponse.Status.OK)
     self.assertEmpty(response.error_message)
     adb.execute_command.assert_called_once_with(
-        ['shell', 'input', 'text', 'The Greatest Text of All Time'], None)
+        ['shell', 'input', 'text', "'The Greatest Text of All Time'"], None)
 
   @parameterized.named_parameters(
       ('negative_x_and_negative_y',
