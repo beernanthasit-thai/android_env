@@ -27,38 +27,21 @@ option java_package = "com.google.androidenv.accessibilityforwarder";
 // or real device) while the server is assumed to be running outside (e.g. in a
 // Python process).
 service A11yService {
-  // Sends a forest of Accessibility trees to a server.
-  rpc SendForest(AndroidAccessibilityForest) returns (ForestResponse) {}
-  // Sends an a11y event to a server.
-  rpc SendEvent(EventRequest) returns (EventResponse) {}
-
   // Long-lived bidirection communication between the client and the server.
   rpc Bidi(stream ClientToServer) returns (stream ServerToClient) {}
 }
 
-// TODO(b/334952387): Remove `ForestResponse`, `EventRequest` and
-// `EventResponse` once bidi communication is in-place.
-message ForestResponse {
-  // The error if anything.
-  string error = 1;
-}
-
 // An Accessibility event.
-message EventRequest {
+message A11yEvent {
   // A single event as a dictionary.
   map<string, string> event = 1;
-}
-
-message EventResponse {
-  // The error if anything.
-  string error = 1;
 }
 
 // The message sent from the Android device to the server running outside of the
 // device.
 message ClientToServer {
   oneof payload {
-    EventRequest event = 1;
+    A11yEvent event = 1;
     AndroidAccessibilityForest forest = 2;
   }
 }

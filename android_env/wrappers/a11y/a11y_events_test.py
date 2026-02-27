@@ -24,8 +24,8 @@ import numpy as np
 from google.protobuf import any_pb2
 
 
-def _event_request(d: dict[str, str]) -> a11y_pb2.EventRequest:
-  event_request = a11y_pb2.EventRequest()
+def _event_request(d: dict[str, str]) -> a11y_pb2.A11yEvent:
+  event_request = a11y_pb2.A11yEvent()
   for k, v in d.items():
     event_request.event[k] = v
   return event_request
@@ -56,34 +56,6 @@ class A11yEventsTest(parameterized.TestCase):
     events = a11y_events.extract_events_from_task_extras(task_extras)
     self.assertEmpty(events)
 
-  @parameterized.parameters(
-      dict(
-          task_extras={'full_event': [{'1': '1'}, {'2': '2'}]},
-          expected_events=[{'1': '1'}, {'2': '2'}],
-      ),
-      dict(
-          task_extras={'full_event': [{}]},
-          expected_events=[{}],
-      ),
-      dict(
-          task_extras={
-              'full_event_wrong_key': [1, 2, 3],
-              'full_event': [{'1': '1'}, {'2': '2'}, {'3': '3'}],
-          },
-          expected_events=[{'1': '1'}, {'2': '2'}, {'3': '3'}],
-      ),
-  )
-  def test_task_extras(self, task_extras, expected_events):
-    event_requests = [_event_request(e) for e in task_extras['full_event']]
-    task_extras['full_event'] = np.stack(event_requests, axis=0)
-    events = a11y_events.extract_events_from_task_extras(task_extras)
-    self.assertEqual(len(events), len(expected_events))
-    for i, event in enumerate(expected_events):
-      self.assertEqual(len(event), len(expected_events[i]))
-      for k, v in event.items():
-        self.assertIn(k, expected_events[i])
-        self.assertEqual(v, expected_events[i][k])
-
   def test_events_key_has_dict_event_requrests(self):
     event_requests = [
         _event_request({'1': '1'}),
@@ -98,7 +70,7 @@ class A11yEventsTest(parameterized.TestCase):
     task_extras = {'full_event': np.stack(event_requests, axis=0)}
     events = a11y_events.extract_events_from_task_extras(task_extras)
     self.assertEqual(len(events), len(expected_events))
-    for i, event in enumerate(expected_events):
+    for i, event in enumerate(events):
       self.assertEqual(len(event), len(expected_events[i]))
       for k, v in event.items():
         self.assertIn(k, expected_events[i])
@@ -118,7 +90,7 @@ class A11yEventsTest(parameterized.TestCase):
     task_extras = {'full_event': np.stack(event_requests, axis=0)}
     events = a11y_events.extract_events_from_task_extras(task_extras)
     self.assertEqual(len(events), len(expected_events))
-    for i, event in enumerate(expected_events):
+    for i, event in enumerate(events):
       self.assertEqual(len(event), len(expected_events[i]))
       for k, v in event.items():
         self.assertIn(k, expected_events[i])

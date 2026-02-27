@@ -76,19 +76,6 @@ def single_item_dict_with_special_chars() -> dict[str, str]:
 
 class A11yServicerTest(parameterized.TestCase, IsolatedAsyncioTestCase):
 
-  def test_servicer_sendforest(self):
-    mock_context = mock.create_autospec(grpc.ServicerContext, instance=True)
-    servicer = a11y_servicer.A11yServicer()
-    servicer.resume()
-    response = servicer.SendForest(one_window_one_node_forest(), mock_context)
-    self.assertEqual(response.error, '')
-    response = servicer.SendForest(one_window_two_nodes_forest(), mock_context)
-    self.assertEqual(response.error, '')
-    forests = servicer.gather_forests()
-    self.assertLen(forests, 2)
-    self.assertEqual(forests[0], one_window_one_node_forest())
-    self.assertEqual(forests[1], one_window_two_nodes_forest())
-
   async def test_servicer_bidi_forests(self):
     """Checks that the bidirectional interface accepts forests."""
 
@@ -103,7 +90,7 @@ class A11yServicerTest(parameterized.TestCase, IsolatedAsyncioTestCase):
         async for x in servicer.Bidi(
             _aiter([
                 a11y_pb2.ClientToServer(
-                    event=a11y_pb2.EventRequest(
+                    event=a11y_pb2.A11yEvent(
                         event=single_item_dict_with_special_chars()
                     )
                 ),
@@ -113,42 +100,42 @@ class A11yServicerTest(parameterized.TestCase, IsolatedAsyncioTestCase):
         )
     ]
     forest = await servicer.get_forest()
+    forests = servicer.gather_forests()
 
     # Assert.
     self.assertEqual(responses[0], a11y_pb2.ServerToClient())
     self.assertEqual(responses[1], a11y_pb2.ServerToClient())
     self.assertIsNotNone(forest)
     self.assertEqual(forest, one_window_two_nodes_forest())
-
-  def test_servicer_sendforest_latest_only(self):
-    mock_context = mock.create_autospec(grpc.ServicerContext, instance=True)
-    servicer = a11y_servicer.A11yServicer(latest_forest_only=True)
-    servicer.resume()
-    response = servicer.SendForest(one_window_one_node_forest(), mock_context)
-    self.assertEqual(response.error, '')
-    response = servicer.SendForest(one_window_two_nodes_forest(), mock_context)
-    self.assertEqual(response.error, '')
-    forests = servicer.gather_forests()
     self.assertLen(forests, 1)
     self.assertEqual(forests[0], one_window_two_nodes_forest())
 
-  def test_servicer_sendevent(self):
+  async def test_servicer_bidi_forests_latest_only(self):
+    """Checks that the bidirectional interface accepts forests."""
+
+    # Arrange.
     mock_context = mock.create_autospec(grpc.ServicerContext, instance=True)
-    servicer = a11y_servicer.A11yServicer()
+    servicer = a11y_servicer.A11yServicer(latest_forest_only=True)
+
+    # Act.
     servicer.resume()
-    response = servicer.SendEvent(
-        a11y_pb2.EventRequest(event=empty_dict()), mock_context
-    )
-    self.assertEqual(response.error, '')
-    response = servicer.SendEvent(
-        a11y_pb2.EventRequest(event=single_item_dict_with_special_chars()),
-        mock_context,
-    )
-    self.assertEqual(response.error, '')
-    events = servicer.gather_events()
-    self.assertLen(events, 2)
-    self.assertEqual(events[0].event, empty_dict())
-    self.assertEqual(events[1].event, single_item_dict_with_special_chars())
+    responses = [
+        x
+        async for x in servicer.Bidi(
+            _aiter([
+                a11y_pb2.ClientToServer(forest=one_window_one_node_forest()),
+                a11y_pb2.ClientToServer(forest=one_window_two_nodes_forest()),
+            ]),
+            mock_context,
+        )
+    ]
+    forests = servicer.gather_forests()
+
+    # Assert.
+    self.assertEqual(responses[0], a11y_pb2.ServerToClient())
+    self.assertEqual(responses[1], a11y_pb2.ServerToClient())
+    self.assertLen(forests, 1)
+    self.assertEqual(forests[0], one_window_two_nodes_forest())
 
   async def test_servicer_bidi_events(self):
     """Checks that the bidirectional interface accepts events."""
@@ -164,10 +151,10 @@ class A11yServicerTest(parameterized.TestCase, IsolatedAsyncioTestCase):
         async for x in servicer.Bidi(
             _aiter([
                 a11y_pb2.ClientToServer(
-                    event=a11y_pb2.EventRequest(event=empty_dict())
+                    event=a11y_pb2.A11yEvent(event=empty_dict())
                 ),
                 a11y_pb2.ClientToServer(
-                    event=a11y_pb2.EventRequest(
+                    event=a11y_pb2.A11yEvent(
                         event=single_item_dict_with_special_chars()
                     )
                 ),
@@ -184,35 +171,47 @@ class A11yServicerTest(parameterized.TestCase, IsolatedAsyncioTestCase):
     self.assertEqual(events[0].event, empty_dict())
     self.assertEqual(events[1].event, single_item_dict_with_special_chars())
 
-  def test_servicer_pause_and_clear_pauses(self):
+  async def test_servicer_pause_and_clear_pauses(self):
     mock_context = mock.create_autospec(grpc.ServicerContext, instance=True)
     servicer = a11y_servicer.A11yServicer()
     servicer.resume()
     servicer.pause_and_clear()
-    response = servicer.SendEvent(
-        a11y_pb2.EventRequest(event=empty_dict()), mock_context
-    )
-    self.assertEqual(response.error, '')
-    response = servicer.SendForest(one_window_one_node_forest(), mock_context)
-    self.assertEqual(response.error, '')
+
+    responses = [
+        x
+        async for x in servicer.Bidi(
+            _aiter([
+                a11y_pb2.ClientToServer(
+                    event=a11y_pb2.A11yEvent(event=empty_dict())
+                ),
+                a11y_pb2.ClientToServer(forest=one_window_one_node_forest()),
+            ]),
+            mock_context,
+        )
+    ]
     events = servicer.gather_events()
     self.assertEmpty(events)
     forests = servicer.gather_forests()
     self.assertEmpty(forests)
 
-  def test_servicer_pause_and_clear_clears(self):
+  async def test_servicer_pause_and_clear_clears(self):
     mock_context = mock.create_autospec(grpc.ServicerContext, instance=True)
     servicer = a11y_servicer.A11yServicer()
     servicer.resume()
-    response = servicer.SendEvent(
-        a11y_pb2.EventRequest(event=empty_dict()), mock_context
-    )
-    self.assertEqual(response.error, '')
-    response = servicer.SendForest(one_window_one_node_forest(), mock_context)
-    self.assertEqual(
-        response.error,
-        '',
-    )
+
+    responses = [
+        x
+        async for x in servicer.Bidi(
+            _aiter([
+                a11y_pb2.ClientToServer(
+                    event=a11y_pb2.A11yEvent(event=empty_dict())
+                ),
+                a11y_pb2.ClientToServer(forest=one_window_one_node_forest()),
+            ]),
+            mock_context,
+        )
+    ]
+
     servicer.pause_and_clear()
     events = servicer.gather_events()
     self.assertEmpty(events)

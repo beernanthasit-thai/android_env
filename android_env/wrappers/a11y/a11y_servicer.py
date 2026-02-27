@@ -33,7 +33,7 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
     self._received_forests: list[
         android_accessibility_forest_pb2.AndroidAccessibilityForest
     ] = []
-    self._received_events: list[a11y_pb2.EventRequest] = []
+    self._received_events: list[a11y_pb2.A11yEvent] = []
     self._lock_forests = threading.Lock()
     self._lock_events = threading.Lock()
     self._latest_forest_only = latest_forest_only
@@ -45,22 +45,6 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
     self._latest_forest: (
         android_accessibility_forest_pb2.AndroidAccessibilityForest | None
     ) = None
-
-  def SendForest(
-      self,
-      request: android_accessibility_forest_pb2.AndroidAccessibilityForest,
-      context: grpc.ServicerContext,
-  ) -> a11y_pb2.ForestResponse:
-    self._process_forest(request)
-    return a11y_pb2.ForestResponse()
-
-  def SendEvent(
-      self,
-      request: a11y_pb2.EventRequest,
-      context: grpc.ServicerContext,
-  ) -> a11y_pb2.EventResponse:
-    self._process_event(request)
-    return a11y_pb2.EventResponse()
 
   async def Bidi(
       self,
@@ -100,6 +84,7 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
           case 'event':
             self._process_event(request.event)
           case 'forest':
+            self._process_forest(request.forest)
             self._latest_forest = request.forest
             self._forest_ready.set()
             self._get_forest.clear()  # Reset the `Event`.
@@ -151,7 +136,7 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
       self._received_forests = []
     return forests
 
-  def gather_events(self) -> list[a11y_pb2.EventRequest]:
+  def gather_events(self) -> list[a11y_pb2.A11yEvent]:
     events = []
     with self._lock_events:
       events = self._received_events
@@ -179,7 +164,7 @@ class A11yServicer(a11y_pb2_grpc.A11yServiceServicer):
     """Start receiving events/forests (e.g., after a reset)."""
     self._paused = False
 
-  def _process_event(self, event: a11y_pb2.EventRequest) -> None:
+  def _process_event(self, event: a11y_pb2.A11yEvent) -> None:
     """Adds the given event to the internal buffer of events."""
 
     if not self._paused:

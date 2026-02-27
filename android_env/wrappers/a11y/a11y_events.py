@@ -29,7 +29,7 @@ _A11Y_EVENT_KEY = 'full_event'
 
 
 def package_events_to_task_extras(
-    events: list[a11y_pb2.EventRequest],
+    events: list[a11y_pb2.A11yEvent],
 ) -> Mapping[str, np.ndarray]:
   if not events:
     return {}
@@ -72,7 +72,7 @@ def extract_events_from_task_extras(
 
   events = []
   for e in task_extras[_A11Y_EVENT_KEY]:
-    if isinstance(e, a11y_pb2.EventRequest):
+    if isinstance(e, a11y_pb2.A11yEvent):
       events.append(dict(e.event))
     elif isinstance(e, dict):
       events.append(e)
@@ -83,7 +83,7 @@ def extract_events_from_task_extras(
           task_extras,
       )
     elif isinstance(e, any_pb2.Any):
-      ev = a11y_pb2.EventRequest()
+      ev = a11y_pb2.A11yEvent()
       new_any = any_pb2.Any()
       new_any.CopyFrom(e)
       new_any.Unpack(ev)

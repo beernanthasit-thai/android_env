@@ -24,7 +24,12 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.ProxyDetector
 import io.grpc.StatusException
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
@@ -47,6 +52,9 @@ class AccessibilityForwarder(
   }
 ) : AccessibilityService() {
 
+  // Channel to send messages to the bidi stream.
+  val bidiChannel = Channel<ClientToServer>(Channel.UNLIMITED)
+
   init {
     // Spawn long-running thread for periodically logging the tree.
     Thread(
@@ -63,6 +71,11 @@ class AccessibilityForwarder(
         }
       )
       .start()
+
+    // Spawn coroutine to handle bidi communication.
+    GlobalScope.launch {
+        handleBidi()
+    }
   }
 
   // grpcStub has a backing property that can be reset to null.
@@ -78,6 +91,27 @@ class AccessibilityForwarder(
 
   private fun resetGrpcStub() {
     _grpcStub = null
+  }
+
+  private suspend fun handleBidi() {
+      while (true) {
+          if (LogFlags.grpcPort <= 0) {
+              Thread.sleep(1000)
+              continue
+          }
+
+          try {
+              Log.i(TAG, "Starting bidi stream.")
+              grpcStub.bidi(bidiChannel.consumeAsFlow()).collect { response ->
+                  // Handle server responses if needed.
+                  Log.i(TAG, "Received server message: $response")
+              }
+          } catch (e: Exception) {
+               Log.w(TAG, "gRPC Exception in bidi stream: $e")
+               resetGrpcStub()
+               Thread.sleep(1000) // Wait before reconnecting.
+          }
+      }
   }
 
   override fun onInterrupt() {
@@ -118,27 +152,8 @@ class AccessibilityForwarder(
     }
 
     val forest = creator.buildForest(windows)
-    try {
-      val grpcTimeoutMillis = 1000L
-      val response: ForestResponse =
-        with(grpcStub) {
-          Log.i(TAG, "sending (blocking) gRPC request for tree.")
-          runBlocking { withTimeout(grpcTimeoutMillis) { sendForest(forest) } }
-        }
-      if (response.error.isNotEmpty()) {
-        Log.w(TAG, "gRPC response.error: ${response.error}")
-      } else {
-        Log.i(TAG, "gRPC request for tree succeeded.")
-      }
-    } catch (e: StatusException) {
-      Log.w(TAG, "gRPC StatusException; are you sure networking is turned on?")
-      Log.i(TAG, "extra: exception ['$e']")
-      resetGrpcStub()
-    } catch (e: TimeoutCancellationException) {
-      Log.w(TAG, "gRPC TimeoutCancellationException; are you sure networking is turned on?")
-      Log.i(TAG, "extra: exception ['$e']")
-      resetGrpcStub()
-    }
+    val request = clientToServer { this.forest = forest }
+    bidiChannel.trySend(request)
   }
 
   private fun getWindowsOrNull(): List<AccessibilityWindowInfo>? =
@@ -239,28 +254,12 @@ class AccessibilityForwarder(
       events.put("event_timestamp_ms", event.eventTime.toString(10))
       // Check if we want to use gRPC.
       if (LogFlags.grpcPort > 0) {
-        try {
-          val grpcTimeoutMillis = 1000L
-          val request = eventRequest { this.event.putAll(events) }
-          val response: EventResponse =
-            with(grpcStub) {
-              Log.i(TAG, "sending (blocking) gRPC request for event.")
-              runBlocking { withTimeout(grpcTimeoutMillis) { sendEvent(request) } }
-            }
-          if (response.error.isNotEmpty()) {
-            Log.w(TAG, "gRPC response.error: ${response.error}")
-          } else {
-            Log.i(TAG, "gRPC request for event succeeded.")
+          val request = clientToServer {
+              this.event = a11yEvent {
+                  this.event.putAll(events)
+              }
           }
-        } catch (e: StatusException) {
-          Log.w(TAG, "gRPC StatusException; are you sure networking is turned on?")
-          Log.i(TAG, "extra: exception ['$e']")
-          resetGrpcStub()
-        } catch (e: TimeoutCancellationException) {
-          Log.w(TAG, "gRPC TimeoutCancellationException; are you sure networking is turned on?")
-          Log.i(TAG, "extra: exception ['$e']")
-          resetGrpcStub()
-        }
+          bidiChannel.trySend(request)
       } else {
         Log.w(TAG, "Can't log accessibility event because gRPC port has not been set.")
       }
